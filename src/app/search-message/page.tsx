@@ -49,6 +49,7 @@ export default function SearchMessagesPage() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchMessages = useCallback(
     debounce(() => {
       fetchMessages()
