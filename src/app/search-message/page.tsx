@@ -53,7 +53,7 @@ export default function SearchMessagesPage() {
   const debouncedFetchMessages = useCallback(
     debounce(() => {
       fetchMessages()
-    }, 300),
+    }, 1000),
     [searchTerm, searchBy, date, sortOrder]
   )
 
@@ -185,8 +185,8 @@ export default function SearchMessagesPage() {
                   <SelectValue placeholder="Sort order" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="newest">Terbaru</SelectItem>
+                  <SelectItem value="oldest">Terlama</SelectItem>
                 </SelectContent>
               </Select>
             </div>
