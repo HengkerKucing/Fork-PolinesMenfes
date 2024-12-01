@@ -86,7 +86,7 @@ export default function HomePage() {
                 title: menfess.track.title,
                 artist: menfess.track.artist,
                 cover_img: menfess.track.cover_img,
-                preview_link: menfess.track.preview_link || null, // Menambahkan preview_link dengan nilai null jika tidak ada
+                preview_link: menfess.track.preview_link || null, 
                 spotify_embed_link: menfess.track.spotify_embed_link,
                 external_link: menfess.track.external_link,
               } : undefined
@@ -163,8 +163,8 @@ export default function HomePage() {
                 <div 
                   ref={containerRef}
                   className={`${
-                    isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center'
-                  } gap-4`}
+                    isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
+                  }`}
                   onScroll={handleScroll}
                 >
                   {recentlyAddedMessages.map((msg) => (

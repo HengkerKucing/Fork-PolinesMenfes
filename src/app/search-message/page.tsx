@@ -70,15 +70,6 @@ export default function SearchMessagesPage() {
     if (date) params.append('date', format(date, 'yyyy-MM-dd'))
     params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
 
-    const cacheKey = `${searchBy}-${searchTerm}-${format(date || new Date(), 'yyyy-MM-dd')}-${sortOrder}`
-    const cachedData = localStorage.getItem(cacheKey)
-
-    if (cachedData) {
-      setSearchResults(JSON.parse(cachedData))
-      setIsLoading(false)
-      return
-    }
-
     try {
       const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
         method: 'GET',
@@ -101,9 +92,8 @@ export default function SearchMessagesPage() {
           artist: menfess.track.artist,
           coverUrl: menfess.track.cover_img
         } : undefined
-      }));
+      }))
 
-      localStorage.setItem(cacheKey, JSON.stringify(sortedMessages))
       setSearchResults(sortedMessages)
     } catch (error) {
       console.error('Error searching messages:', error)
@@ -190,10 +180,10 @@ export default function SearchMessagesPage() {
             <p className="mt-2">Loading...</p>
           </div>
         ) : searchResults !== null && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 sm:mt-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6 sm:mt-8 justify-items-center">
             {searchResults.length > 0 ? (
               searchResults.map((msg) => (
-                <Link href={`/message/${msg.id}`} key={msg.id} className="w-full max-w-sm flex justify-center">
+                <Link href={`/message/${msg.id}`} key={msg.id} className="w-full max-w-xs flex justify-center">
                   <CarouselCard 
                     to={msg.recipient} 
                     from={msg.sender} 
