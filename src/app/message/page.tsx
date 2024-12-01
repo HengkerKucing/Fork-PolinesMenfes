@@ -138,7 +138,14 @@ export default function MulaiBerceritaPage() {
           recipient: to,
           message: message,
           spotify_id: spotifyId,
-          recaptcha_token: recaptchaToken, // Pastikan token ini tidak kosong
+          track_metadata: {
+            name: selectedTrack?.name,
+            artist: selectedTrack?.artist,
+            album: selectedTrack?.album,
+            cover_url: selectedTrack?.cover_url,
+            external_url: selectedTrack?.external_url
+          },
+          recaptcha_token: recaptchaToken
         };
         
         const response = await fetch("https://solifess.vercel.app/v1/api/menfess-spotify", {
