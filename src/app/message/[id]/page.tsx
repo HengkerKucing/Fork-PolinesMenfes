@@ -6,9 +6,9 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import { Loader2 } from 'lucide-react';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { Loader2 } from "lucide-react";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -19,6 +19,9 @@ type MessageType = {
   recipient: string;
   message: string;
   track?: {
+    title: string;
+    artist: string;
+    cover_img?: string;
     spotify_embed_link?: string;
   };
   created_at: string;
@@ -35,13 +38,12 @@ export default function MessagePage() {
       setIsLoading(true);
       try {
         const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
-        
-        if (data && data.status && data.data && data.data.length > 0) {
+        const data = await response.json();
+
+        if (data && data.success && data.data && data.data.length > 0) {
           setMessage(data.data[0]);
         } else {
-          console.error("Failed to fetch message:", data.message);
+          console.error("Failed to fetch message:", data.message || "Unexpected response");
           setMessage(null);
         }
       } catch (error) {
@@ -51,7 +53,7 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-  
+
     fetchMessage();
   }, [params.id]);
 
@@ -94,12 +96,12 @@ export default function MessagePage() {
                 {message.message}
               </p>
               {message.track?.spotify_embed_link && (
-                <iframe 
+                <iframe
                   key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
+                  src={message.track.spotify_embed_link}
+                  width="100%"
+                  height="352"
+                  allowFullScreen
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
                 />

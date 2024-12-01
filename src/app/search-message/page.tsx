@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -6,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
 import { CarouselCard } from "@/components/carousel-card"
-import { ScrollToTopButton } from "@/components/scroll-to-top-button"
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { Switch } from "@/components/ui/switch"
@@ -47,13 +47,11 @@ export default function SearchMessagesPage() {
   const [searchBy, setSearchBy] = useState<'recipient' | 'sender'>('recipient')
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchMessages = useCallback(
     debounce(() => {
       fetchMessages()
-    }, 1000),
+    }, 300),
     [searchTerm, searchBy, date, sortOrder]
   )
 
@@ -71,6 +69,15 @@ export default function SearchMessagesPage() {
     if (searchTerm) params.append(searchBy, searchTerm)
     if (date) params.append('date', format(date, 'yyyy-MM-dd'))
     params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
+
+    const cacheKey = `${searchBy}-${searchTerm}-${format(date || new Date(), 'yyyy-MM-dd')}-${sortOrder}`
+    const cachedData = localStorage.getItem(cacheKey)
+
+    if (cachedData) {
+      setSearchResults(JSON.parse(cachedData))
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
@@ -96,6 +103,7 @@ export default function SearchMessagesPage() {
         } : undefined
       }));
 
+      localStorage.setItem(cacheKey, JSON.stringify(sortedMessages))
       setSearchResults(sortedMessages)
     } catch (error) {
       console.error('Error searching messages:', error)
@@ -108,20 +116,20 @@ export default function SearchMessagesPage() {
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8 sm:py-12 md:py-16 max-w-6xl">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Cari Menfess</h1>
-        <div className="flex justify-center mb-4 sm:mb-6">
+      <main className="flex-grow container mx-auto px-4 py-16 sm:py-24 md:py-32">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center">Cari Menfess</h1>
+        <div className="flex justify-center mb-6 sm:mb-8">
           <Link
             href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
-            className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+            className="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4" />
           </Link>
         </div>
-        <div className="max-w-3xl mx-auto mb-6">
-          <div className="flex flex-col space-y-4">
-            <div className="relative">
+        <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
+          <div className="flex items-center mb-4 sm:mb-6">
+            <div className="relative flex-grow">
               <Input
                 id="searchTerm"
                 value={searchTerm}
@@ -130,7 +138,7 @@ export default function SearchMessagesPage() {
                 placeholder={`Search by ${searchBy}`}
                 disabled={isLoading}
               />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                 <Switch
                   id="search-by"
                   checked={searchBy === 'sender'}
@@ -139,54 +147,38 @@ export default function SearchMessagesPage() {
                 />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <div className="flex w-full sm:w-auto space-x-2">
-                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "flex-grow sm:flex-grow-0 sm:w-[140px] justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? (
-                        <span className="truncate">
-                          {format(date, "dd MMM yyyy")}
-                        </span>
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={(newDate) => {
-                        setDate(newDate);
-                        setIsCalendarOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Button
-                  onClick={() => setDate(undefined)}
-                  variant="outline"
-                  className="flex-shrink-0"
-                >
-                  Reset
-                </Button>
-              </div>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full sm:w-[180px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <Select value={sortOrder} onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}>
                 <SelectTrigger className="w-full sm:w-[120px]">
                   <SelectValue placeholder="Sort order" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">Terbaru</SelectItem>
-                  <SelectItem value="oldest">Terlama</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -198,10 +190,10 @@ export default function SearchMessagesPage() {
             <p className="mt-2">Loading...</p>
           </div>
         ) : searchResults !== null && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 sm:mt-8 justify-items-center">
             {searchResults.length > 0 ? (
               searchResults.map((msg) => (
-                <Link href={`/message/${msg.id}`} key={msg.id} className="w-full max-w-xs flex justify-center">
+                <Link href={`/message/${msg.id}`} key={msg.id} className="w-full max-w-sm flex justify-center">
                   <CarouselCard 
                     to={msg.recipient} 
                     from={msg.sender} 
@@ -221,7 +213,6 @@ export default function SearchMessagesPage() {
         )}
       </main>
       <Footer />
-      <ScrollToTopButton />
     </div>
   )
 }

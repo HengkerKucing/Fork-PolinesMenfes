@@ -23,6 +23,7 @@ interface Menfess {
     cover_img: string;
     preview_link: string | null;
     spotify_embed_link: string;
+    external_link: string;
   };
   song?: {
     title: string;
@@ -81,10 +82,13 @@ export default function HomePage() {
             .slice(0, 5)
             .map(menfess => ({
               ...menfess,
-              song: menfess.track ? {
+              track: menfess.track ? {
                 title: menfess.track.title,
                 artist: menfess.track.artist,
-                coverUrl: menfess.track.cover_img
+                cover_img: menfess.track.cover_img,
+                preview_link: menfess.track.preview_link || null, // Menambahkan preview_link dengan nilai null jika tidak ada
+                spotify_embed_link: menfess.track.spotify_embed_link,
+                external_link: menfess.track.external_link,
               } : undefined
             }));
           
@@ -158,27 +162,26 @@ export default function HomePage() {
               <div className="relative">
                 <div 
                   ref={containerRef}
-                  className={`
-                    ${isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center'}
-                    gap-4
-                  `}
+                  className={`${
+                    isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center'
+                  } gap-4`}
                   onScroll={handleScroll}
                 >
                   {recentlyAddedMessages.map((msg) => (
                     <div 
                       key={msg.id} 
-                      className={`
-                        ${isMobile ? 'flex flex-shrink-0 w-full snap-center justify-center' : ''}
-                      `}
+                      className={`${
+                        isMobile ? 'flex flex-shrink-0 w-full snap-center justify-center' : ''
+                      }`}
                     >
                       <Link href={`/message/${msg.id}`}>
                         <CarouselCard 
                           to={msg.recipient} 
                           from={msg.sender} 
                           message={msg.message}
-                          songTitle={msg.song?.title}
-                          artist={msg.song?.artist}
-                          coverUrl={msg.song?.coverUrl}
+                          songTitle={msg.track?.title}
+                          artist={msg.track?.artist}
+                          coverUrl={msg.track?.cover_img}
                         />
                       </Link>
                     </div>
